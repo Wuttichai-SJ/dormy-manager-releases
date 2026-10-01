@@ -1,0 +1,11 @@
+{
+  "name": "dormy-manager-site",
+  "private": true,
+  "description": "เครื่องมือตรวจหน้าเว็บดาวน์โหลด (ตัวเว็บใน site/ ไม่ต้อง build)",
+  "scripts": {
+    "lint": "html-validate \"site/**/*.html\""
+  },
+  "devDependencies": {
+    "html-validate": "11.16.1"
+  }
+}

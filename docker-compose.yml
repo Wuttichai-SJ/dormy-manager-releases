@@ -1,0 +1,6 @@
+# ดูหน้าเว็บในเครื่อง: docker compose up --build แล้วเปิด http://localhost:8080
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
