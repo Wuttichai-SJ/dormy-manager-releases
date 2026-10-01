@@ -23,9 +23,14 @@ jobs:
       - name: Smoke test
         run: |
           docker run -d --rm --name site -p 8080:8080 dormy-site
-          curl --fail --silent --retry 5 --retry-connrefused --retry-delay 1 http://localhost:8080/ | grep -q "<title>Dormy Manager</title>"
+          # รอให้ nginx พร้อมก่อน — ช่วงแรก container รับ connection แล้วตัดทิ้งได้
+          curl --fail --silent --retry 10 --retry-all-errors --retry-delay 1 --output index.out http://localhost:8080/
+          grep -q "<title>Dormy Manager</title>" index.out
           curl --fail --silent --output /dev/null http://localhost:8080/style.css
           docker stop site
+      - name: Container log (เมื่อ smoke test ไม่ผ่าน)
+        if: failure()
+        run: docker logs site || true
 
   sonar:
     runs-on: ubuntu-latest
