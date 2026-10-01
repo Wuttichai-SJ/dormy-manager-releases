@@ -1,0 +1,37 @@
+body {
+  margin: 0;
+  font-family: "Leelawadee UI", Tahoma, sans-serif;
+  line-height: 1.7;
+  color: #2b2118;
+  background: #fbf6ea;
+}
+
+main {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 4rem 1.25rem;
+}
+
+h1 {
+  margin: 0 0 0.5rem;
+  line-height: 1.2;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.6rem 1.4rem;
+  border-radius: 6px;
+  color: #ffffff;
+  background: #6b4423;
+  text-decoration: none;
+}
+
+.button:hover,
+.button:focus-visible {
+  background: #53341a;
+}
+
+.note {
+  color: #6f6255;
+  font-size: 0.9rem;
+}
