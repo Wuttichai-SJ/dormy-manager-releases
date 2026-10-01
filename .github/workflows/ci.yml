@@ -1,0 +1,51 @@
+# ด่านตรวจของทุก PR — ต้องผ่านก่อน merge เข้า main
+name: ci
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      # html-validate รันอยู่ใน stage แรกของ Dockerfile
+      - name: Build image
+        run: docker build -t dormy-site .
+      - name: Smoke test
+        run: |
+          docker run -d --rm --name site -p 8080:8080 dormy-site
+          # รอให้ nginx พร้อมก่อน — ช่วงแรก container รับ connection แล้วตัดทิ้งได้
+          curl --fail --silent --retry 10 --retry-all-errors --retry-delay 1 --output index.out http://localhost:8080/
+          grep -q "<title>Dormy Manager</title>" index.out
+          curl --fail --silent --output /dev/null http://localhost:8080/style.css
+          docker stop site
+      - name: Container log (เมื่อ smoke test ไม่ผ่าน)
+        if: failure()
+        run: docker logs site || true
+
+  sonar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: ข้ามเมื่อยังไม่ได้ตั้ง SONAR_TOKEN
+        if: env.SONAR_TOKEN == ''
+        run: echo "::warning::ยังไม่ได้ตั้ง secret SONAR_TOKEN จึงไม่ได้สแกน SonarQube"
+      - name: SonarQube scan + quality gate
+        if: env.SONAR_TOKEN != ''
+        uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
+        with:
+          args: -Dsonar.qualitygate.wait=true
